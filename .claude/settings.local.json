@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__azure-devops__listProjects",
+      "mcp__azure__subscription_list",
+      "mcp__azure__group_list",
+      "mcp__azure__group_resource_list"
+    ]
+  }
+}
