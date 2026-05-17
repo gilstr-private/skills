@@ -113,38 +113,6 @@ determine the **review scope** by asking:
 
 Save all inputs to `{workspace}/inputs/`.
 
-### Working-directory scope (affects R3's reach)
-
-R3 (contextual bugs) follows imports and cross-module calls to verify
-contracts. Its reach is limited to whatever is readable from the
-current working directory down. This matters when the diff calls into
-another service:
-
-- **Single-repo PR, no cross-service concerns** → invoke from anywhere
-  convenient; R3's reach is naturally scoped to this repo.
-- **Multi-service repo (monorepo / workspace) where the PR touches
-  service A and service A calls service B** → invoke from the common
-  root so R3 can read service B's source. This is the difference
-  between R3 *possibly* catching a cross-service contract mismatch and
-  R3 *actually* catching it.
-- **Cross-repo PR (service A and service B in separate repos)** → if
-  the repos can be checked out side-by-side, do so and invoke from the
-  parent directory. Otherwise, R3 will note cross-service calls as
-  "unverifiable" rather than flag speculatively.
-
-If the user invokes `/review` from a directory that looks like a
-single service but the diff contains imports referencing sibling
-directories (e.g., `../service-b/client`, `@company/service-b`), ask:
-
-> I notice this PR calls into service B (or other modules) outside
-> the current working directory. To let R3 verify those calls against
-> service B's actual source, I'd recommend re-running `/review` from
-> the parent directory containing both services. Continue with the
-> current scope, or re-invoke from a broader root?
-
-Record the invocation root in `session.json` as `invocation_root`
-so reviewers know their search boundary.
-
 ---
 
 ## Step 2: Set Up the Workspace
@@ -188,7 +156,6 @@ Initialize `session.json`:
   "review_scope": "<scope>",
   "branch": "<branch>",
   "story": "<story title or N/A>",
-  "invocation_root": "<absolute path from which /review was invoked>",
   "status": "in-progress",
   "current_round": 1,
   "max_rounds": 5,

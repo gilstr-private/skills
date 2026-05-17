@@ -187,10 +187,7 @@ a loaded standard and its file path. Example:
 
 **Model**: Sonnet
 **Additional inputs**: you may read the full changed files and run
-`git blame` / `git log -p` on modified lines. You may also read **any
-file reachable from the repository root**, including files outside the
-changed set — this is deliberate and central to your role (see
-"Cross-module calls" below).
+`git blame` / `git log -p` on modified lines.
 
 **What you look for**:
 - Regressions against prior intent (the blame shows why the line
@@ -202,48 +199,11 @@ changed set — this is deliberate and central to your role (see
   context
 - Error paths that swallow or mishandle exceptions
 - Resource cleanup failures in error paths
-- **Cross-module / cross-service contract mismatches** (see below)
-
-**Cross-module calls** (critical — this is often the highest-value class
-of R3 finding):
-
-When the diff contains calls, imports, or references to code outside
-the changed files, **follow those references and read the callee's
-definition before evaluating the call site.** Treat cross-module and
-cross-service calls as first-class review surface.
-
-Specifically:
-1. For each call to a function, method, or endpoint defined elsewhere,
-   locate the definition by following the import, resolving the module
-   path, or searching the repo (`Grep` / `Glob` the symbol name).
-2. Compare the call against the located definition:
-   - Argument count and order
-   - Argument types and shapes (object vs positional, required vs optional)
-   - Return type usage (is the caller treating the return value correctly?)
-   - Semantic hints (parameter names that suggest intent — e.g., a call
-     passing a `userId` to a parameter named `username`)
-3. If the callee lives in a sibling service or module within the same
-   monorepo / workspace, read that service's current source — not what
-   the caller thinks the signature is. The callee's signature may have
-   changed in a prior merge without the caller being updated, and the
-   resulting bug lives on the caller's side even though the cause was
-   upstream. Flag it as a regression on the caller with clear evidence
-   of the current signature.
-4. If the callee is a remote service reached via HTTP/gRPC/SDK and you
-   can locate its contract (OpenAPI spec, proto file, typed client
-   definition), treat the contract as the source of truth and compare
-   the call against it.
-5. If the callee is a remote service with no locatable contract,
-   **do not flag speculatively**. Note it in your report as an
-   "unverifiable cross-service call" so the human knows the reviewer
-   couldn't check it, but do not raise a finding.
 
 **Don't flag**:
 - Bugs visible from the diff alone (R2 owns those — duplicates hurt signal)
 - Standards violations (R1)
 - Security issues (R4)
-- Cross-service calls you can't verify against a real contract —
-  speculation here is especially noisy
 
 ---
 

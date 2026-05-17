@@ -91,7 +91,6 @@ Inputs:
 - output_path: {workspace}/rounds/round-{n}/reviewers/r{N}-{name}.md
 - round_number: {n}
 - previous_reports_dir: {workspace}/rounds/ (if round > 1)
-- invocation_root: {absolute path from session.json} — (R3 especially) your read boundary for following cross-module calls
 - (R1 only) standards_path: {workspace}/standards/applicable.md
 
 Don't-flag reference: $SKILL_PATH/references/dont-flag.md
